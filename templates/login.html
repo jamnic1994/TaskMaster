@@ -4,18 +4,20 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-4">
-        <h2 class="text-center">{{ 'Login' if request.path == '/login' else 'Register' }}</h2>
+        <h2 class="text-center">Login</h2>
 
-        <!-- Flash Messages Section -->
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <div class="alert alert-warning" role="alert">
-              {% for message in messages %}
-                <p>{{ message }}</p>
-              {% endfor %}
-            </div>
-          {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endwith %}
+
 
         <form method="POST">
             <div class="mb-3">

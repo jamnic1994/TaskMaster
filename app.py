@@ -18,6 +18,7 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# TODO: @login_required can't be on default landing page
 @app.route('/')
 @login_required
 def index():
@@ -34,24 +35,16 @@ def login():
         # Fetch the user from the database
         user = User.query.filter_by(username=username).first()
 
-        print(f"User found: {user}")  # Debugging: Print the user object
-
         if user:
-            print(f"Entered password: {password}")
-            print(f"Stored password hash: {user.password_hash}")
-
             if check_password_hash(user.password_hash, password):
-                print("Password matches!")
                 login_user(user)
-                flash('Logged in successfully!')
+                flash('Logged in successfully!', 'success')
                 return redirect(url_for('index'))
             else:
-                print("Password does not match.")
-                flash('Invalid username or password.')
+                flash('Invalid username or password.', 'error')
                 return redirect(url_for('login'))
         else:
-            print("User not found.")
-            flash('Invalid username or password.')
+            flash('Invalid username or password.', 'error')
             return redirect(url_for('login'))
 
     return render_template('login.html')
@@ -72,13 +65,13 @@ def register():
         }
 
         if User.query.filter((User.username == user_data['username']) | (User.email == user_data['email'])).first():
-            flash('Username or email already taken.')
+            flash('Username or email already taken.', 'error')
             return redirect(url_for('register'))
 
         new_user = User(**user_data)
         db.session.add(new_user)
         db.session.commit()
-        flash('Registration successful. Please log in.')
+        flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -93,7 +86,7 @@ def add_task():
         due_date_str = request.form['due_date']  # Date in string format from the form
 
         # Convert due_date_str to a date object if it is not empty
-        due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date() if due_date_str else None
+        due_date = datetime.strptime(due_date_str, '%d-%m-%Y').date() if due_date_str else None
 
         # Create a new Task instance
         new_task = Task(
@@ -108,7 +101,7 @@ def add_task():
         # Add to database
         db.session.add(new_task)
         db.session.commit()
-        flash('Task added successfully!')
+        flash('Task added successfully!', 'success')
         return redirect(url_for('index'))
 
     return render_template('task_form.html')
@@ -125,7 +118,7 @@ def delete_task(task_id):
 @app.route('/logout')
 def logout():
     logout_user()
-    flash('Logged out successfully.')
+    flash('Logged out successfully.', 'success')
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
