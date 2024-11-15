@@ -18,8 +18,9 @@
         {% for task in tasks %}
         <tr>
             <td>{{ task.title }}</td>
+            <td>{{ task.priority }}</td>
             <td>{{ task.status }}</td>
-            <td>{{ task.deadline }}</td>
+            <td>{{ task.due_date }}</td>
             <td><a class="btn btn-danger btn-sm" href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a></td>
         </tr>
         {% endfor %}
