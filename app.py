@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -80,20 +82,34 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
-@app.route('/add', methods=['GET', 'POST'])
+@app.route('/add_task', methods=['GET', 'POST'])
 @login_required
 def add_task():
     if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        priority = request.form['priority']
+        due_date_str = request.form['due_date']  # Date in string format from the form
+
+        # Convert due_date_str to a date object if it is not empty
+        due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date() if due_date_str else None
+
+        # Create a new Task instance
         new_task = Task(
-            title=request.form['title'],
-            description=request.form.get('description'),
-            priority=request.form.get('priority'),
-            due_date=request.form.get('due_date'),
+            title=title,
+            description=description,
+            priority=int(priority),  # Convert priority to integer
+            due_date=due_date,
+            status='Pending',
             user_id=current_user.id
         )
+
+        # Add to database
         db.session.add(new_task)
         db.session.commit()
+        flash('Task added successfully!')
         return redirect(url_for('index'))
+
     return render_template('task_form.html')
 
 @app.route('/delete/<int:task_id>')
@@ -108,6 +124,7 @@ def delete_task(task_id):
 @app.route('/logout')
 def logout():
     logout_user()
+    flash('Logged out successfully.')
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
