@@ -19,14 +19,14 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # TODO: @login_required can't be on default landing page
-@app.route('/')
+@app.route('/index')
 @login_required
 def index():
     tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.priority).all()
     return render_template('index.html', tasks=tasks)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -38,7 +38,6 @@ def login():
         if user:
             if check_password_hash(user.password_hash, password):
                 login_user(user)
-                flash('Logged in successfully!', 'success')
                 return redirect(url_for('index'))
             else:
                 flash('Invalid username or password.', 'error')
