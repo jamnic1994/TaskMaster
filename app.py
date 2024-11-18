@@ -18,14 +18,6 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# TODO: @login_required can't be on default landing page
-@app.route('/index')
-@login_required
-def index():
-    tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.priority).all()
-    return render_template('index.html', tasks=tasks)
-
-
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -74,6 +66,13 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+@app.route('/index')
+@login_required
+def index():
+    tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.priority).all()
+    return render_template('index.html', tasks=tasks)
+
 
 @app.route('/add_task', methods=['GET', 'POST'])
 @login_required
