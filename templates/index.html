@@ -3,7 +3,10 @@
 
 {% block content %}
 <h2 class="text-center mb-4">Your Tasks</h2>
-<a class="btn btn-primary mb-3" href="{{ url_for('add_task') }}">Add Task</a>
+<div class="d-flex justify-content-between mb-3">
+    <a class="btn btn-primary me-2" href="{{ url_for('add_task') }}">Add Task</a>
+    <a class="btn btn-secondary" href="{{ url_for('manage_groups') }}">Manage Groups</a>
+</div>
 <table class="table table-hover">
     <thead>
         <tr>
@@ -20,7 +23,7 @@
             <td>{{ task.title }}</td>
             <td>{{ task.priority }}</td>
             <td>{{ task.status }}</td>
-            <td>{{ task.due_date }}</td>
+            <td>{{ task.due_date.strftime('%d/%m/%Y') if task.due_date else 'N/A' }}</td>
             <td><a class="btn btn-danger btn-sm" href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a></td>
         </tr>
         {% endfor %}

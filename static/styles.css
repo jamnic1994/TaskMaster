@@ -18,9 +18,10 @@ body {
 }
 
 .alert {
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    margin: 20px auto;
+    padding: 10px 20px;
+    max-width: 600px;
+    width: 100%;
 }
 
 .alert-success {
@@ -41,3 +42,10 @@ body {
     color: #0c5460;
 }
 
+.form-container {
+    background-color: #D5DEDE; /* Light grey background */
+    padding: 20px; /* Add some padding inside the container */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    margin: 20px auto; /* Center the form on the page with top/bottom margin */
+}

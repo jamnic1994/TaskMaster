@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Task
+from models import db, User, Task, TaskGroup
 import config
 
 app = Flask(__name__)
@@ -20,6 +20,11 @@ def load_user(user_id):
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+
+    # If the user is already logged in, redirect them to the index page
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -78,31 +83,24 @@ def index():
 @login_required
 def add_task():
     if request.method == 'POST':
-        title = request.form['title']
-        description = request.form['description']
-        priority = request.form['priority']
-        due_date_str = request.form['due_date']  # Date in string format from the form
+        # Process form submission
+        group_id = request.form.get('group')  # Get the selected group
 
-        # Convert due_date_str to a date object if it is not empty
-        due_date = datetime.strptime(due_date_str, '%d-%m-%Y').date() if due_date_str else None
-
-        # Create a new Task instance
         new_task = Task(
-            title=title,
-            description=description,
-            priority=int(priority),  # Convert priority to integer
-            due_date=due_date,
-            status='Pending',
+            title=request.form['title'],
+            description=request.form['description'],
+            priority=int(request.form['priority']),
+            due_date=datetime.strptime(request.form['due_date'], '%Y-%m-%d'),
+            group_id=int(group_id) if group_id else None,  # Assign group if selected
             user_id=current_user.id
         )
-
-        # Add to database
         db.session.add(new_task)
         db.session.commit()
-        flash('Task added successfully!', 'success')
+        flash('Task added successfully!')
         return redirect(url_for('index'))
 
-    return render_template('task_form.html')
+    groups = TaskGroup.query.filter_by(user_id=current_user.id).all()  # Fetch user's groups
+    return render_template('task_form.html', groups=groups)
 
 @app.route('/delete/<int:task_id>')
 @login_required
@@ -112,6 +110,75 @@ def delete_task(task_id):
         db.session.delete(task)
         db.session.commit()
     return redirect(url_for('index'))
+
+@app.route('/manage_groups', methods=['GET', 'POST'])
+@login_required
+def manage_groups():
+    if request.method == 'POST':
+        group_name = request.form['group_name']
+        description = request.form.get('description', '')
+        new_group = TaskGroup(name=group_name, description=description, user_id=current_user.id)
+        db.session.add(new_group)
+        db.session.commit()
+        flash('Group created successfully!', 'success')
+        return redirect(url_for('manage_groups'))
+
+    groups = TaskGroup.query.filter_by(user_id=current_user.id).all()
+    tasks = {group.id: Task.query.filter_by(group_id=group.id).all() for group in groups}
+
+    return render_template('manage_groups.html', groups=groups, tasks=tasks)
+
+@app.route('/edit-group/<int:group_id>', methods=['GET', 'POST'])
+@login_required
+def edit_group(group_id):
+    group = TaskGroup.query.get_or_404(group_id)
+    if request.method == 'POST':
+        group.name = request.form['name']
+        db.session.commit()
+        flash('Group updated successfully!')
+        return redirect(url_for('manage_groups'))
+    return render_template('edit_group.html', group=group)
+
+
+@app.route('/update_group/<int:group_id>', methods=['POST'])
+@login_required
+def update_group(group_id):
+    group = TaskGroup.query.get_or_404(group_id)  # Fetch the group or return 404
+
+    # Check if the current user owns the group
+    if group.user_id != current_user.id:
+        flash('Unauthorized action!', 'error')
+        return redirect(url_for('manage_groups'))
+
+    # Update the group's name and description
+    group.name = request.form['group_name']
+    group.description = request.form.get('description', '')  # Optional field
+
+    db.session.commit()  # Save changes to the database
+    flash('Group updated successfully.', 'success')
+    return redirect(url_for('manage_groups'))
+
+
+@app.route('/delete-group/<int:group_id>', methods=['POST'])
+@login_required
+def delete_group(group_id):
+    group = TaskGroup.query.get_or_404(group_id)  # Fetch the group or return 404
+
+    if group.user_id != current_user.id:
+        flash('Unauthorized action!', 'error')
+        return redirect(url_for('manage_groups'))
+
+    db.session.delete(group)
+    db.session.commit()
+    flash('Group deleted successfully!', 'success')
+    return redirect(url_for('manage_groups'))
+
+@app.route('/tasks/<int:group_id>')
+@login_required
+def tasks_by_group(group_id):
+    tasks = Task.query.filter_by(user_id=current_user.id, group_id=group_id).all()
+    group = TaskGroup.query.get_or_404(group_id)
+    return render_template('tasks.html', tasks=tasks, group=group)
 
 @app.route('/logout')
 def logout():

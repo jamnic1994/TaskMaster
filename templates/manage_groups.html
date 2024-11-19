@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="text-align: center;">Manage Groups</h2>
+
+<!-- Create Group Section -->
+<div class="form-container">
+    <h3>Create a New Group:</h3>
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="group_name" class="form-label">Group Title:</label>
+            <input type="text" name="group_name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description (optional):</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">Create Group</button>
+        </div>
+    </form>
+</div>
+
+<!-- Groups List Section -->
+<div class="form-container mt-4">
+    <h3>Existing Groups:</h3>
+
+    <ul class="list-group">
+        {% for group in groups %}
+        <li class="list-group-item d-flex justify-content-between align-items-center mb-3">
+            <form method="POST" action="{{ url_for('update_group', group_id=group.id) }}" id="editForm-{{ group.id }}" class="d-flex flex-column">
+
+                <div class="row" style="font-weight: bold">
+                    <div class="col-4">
+                        <label for="group_name" class="form-label font-weight-bold">Title:</label>
+                    </div>
+                    <div class="col-2">
+                        <label for="description" class="form-label font-weight-bold">Description:</label>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <div class="row">
+                    <div class="col-4">
+                        <input type="text" name="group_name" class="form-control" value="{{ group.name }}" readonly id="group-name-{{ group.id }}">
+                    </div>
+                    <div class="col-8">
+                        <textarea name="description" class="form-control" readonly id="group-description-{{ group.id }}" rows="1">{{ group.description }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Dropdown for Tasks -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="tasks" class="form-label" style="font-weight: bold">Tasks:</label>
+                        <select name="tasks" class="form-select">
+                            {% if tasks[group.id] %}
+                                {% for task in tasks[group.id] %}
+                                    <option value="{{ task.id }}">{{ task.title }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option disabled>No Tasks</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- Buttons (Edit, Confirm, Delete) -->
+            <div class="d-flex">
+                <!-- Edit Button -->
+                <button type="button" class="btn btn-warning btn-sm me-2" id="edit-btn-{{ group.id }}" onclick="toggleEdit({{ group.id }})">Edit</button>
+
+                <!-- Confirm Button - hidden by default -->
+                <button type="submit" class="btn btn-success btn-sm me-2" id="confirm-btn-{{ group.id }}" style="display:none;" form="editForm-{{ group.id }}">Confirm</button>
+
+                <!-- Delete Button -->
+                <form method="POST" action="{{ url_for('delete_group', group_id=group.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm me-2">Delete</button>
+                </form>
+            </div>
+
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
+
