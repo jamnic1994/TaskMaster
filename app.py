@@ -76,7 +76,11 @@ def register():
 @login_required
 def index():
     tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.priority).all()
-    return render_template('index.html', tasks=tasks)
+    # Fetch all groups for the current user
+    groups = TaskGroup.query.filter_by(user_id=current_user.id).all()
+    tasks_group = {group.id: Task.query.filter_by(user_id=current_user.id, group_id=group.id).all() for group in groups}
+    return render_template('index.html', tasks=tasks, groups=groups, tasks_by_group=tasks_group)
+
 
 
 @app.route('/add_task', methods=['GET', 'POST'])
@@ -101,6 +105,37 @@ def add_task():
 
     groups = TaskGroup.query.filter_by(user_id=current_user.id).all()  # Fetch user's groups
     return render_template('task_form.html', groups=groups)
+
+@app.route('/update_task/<int:task_id>', methods=['POST'])
+@login_required
+def update_task(task_id):
+    task = Task.query.get_or_404(task_id)
+
+    # Update task fields from form data
+    task.title = request.form['title']
+    task.priority = request.form['priority']
+    task.status = request.form['status']
+
+    # Convert due_date string to a Python date object, handle empty input
+    due_date = request.form['due_date']
+    if due_date:
+        try:
+            task.due_date = datetime.strptime(due_date, '%Y-%m-%d').date()  # Parse string to date
+        except ValueError:
+            flash('Invalid date format. Please use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('index'))
+    else:
+        task.due_date = None  # Clear the due date if input is empty
+
+    # Handle group_id
+    group_id = request.form.get('group_id')
+    task.group_id = int(group_id) if group_id else None
+
+    # Commit changes to the database
+    db.session.commit()
+    flash('Task updated successfully', 'success')
+    return redirect(url_for('index'))
+
 
 @app.route('/delete/<int:task_id>')
 @login_required
@@ -173,12 +208,14 @@ def delete_group(group_id):
     flash('Group deleted successfully!', 'success')
     return redirect(url_for('manage_groups'))
 
-@app.route('/tasks/<int:group_id>')
+@app.route('/index/<int:group_id>')
 @login_required
 def tasks_by_group(group_id):
+    # Fetch tasks for the specified group
     tasks = Task.query.filter_by(user_id=current_user.id, group_id=group_id).all()
+    # Fetch the group itself
     group = TaskGroup.query.get_or_404(group_id)
-    return render_template('tasks.html', tasks=tasks, group=group)
+    return render_template('index.html', tasks=tasks, group=group)
 
 @app.route('/logout')
 def logout():

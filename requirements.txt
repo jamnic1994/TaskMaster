@@ -11,3 +11,4 @@ colorama~=0.4.6
 itsdangerous~=2.2.0
 pip~=24.3.1
 typing_extensions~=4.12.2
+pytest~=8.3.3

@@ -3,30 +3,272 @@
 
 {% block content %}
 <h2 class="text-center mb-4">Your Tasks</h2>
+
+<!-- Toggle Switch for Switching Views -->
+<div class="d-flex justify-content-center mb-3">
+    <span id="toggleLabel1" class="ms-3" style="margin-right: 20px;">Task View</span>
+    <label class="switch">
+        <input type="checkbox" id="viewToggle">
+        <span class="slider round"></span>
+    </label>
+    <span id="toggleLabel2" class="ms-3" style="margin-left: 20px;">Group View</span>
+</div>
+
 <div class="d-flex justify-content-between mb-3">
     <a class="btn btn-primary me-2" href="{{ url_for('add_task') }}">Add Task</a>
     <a class="btn btn-secondary" href="{{ url_for('manage_groups') }}">Manage Groups</a>
 </div>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Due Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
+
+<!-- Task View (Default View) -->
+<div id="taskView" style="display: block;">
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Group</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for task in tasks %}
-        <tr>
-            <td>{{ task.title }}</td>
-            <td>{{ task.priority }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.due_date.strftime('%d/%m/%Y') if task.due_date else 'N/A' }}</td>
-            <td><a class="btn btn-danger btn-sm" href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a></td>
-        </tr>
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>
+                    <div class="form-check">
+                        {% if task.priority == 1 %}
+                            <input
+                                type="radio"
+                                class="form-check-input low"
+                                id="priorityLow-{{ task.id }}"
+                                name="priority-{{ task.id }}"
+                                value="1"
+                                checked
+                                disabled>
+                            <label for="priorityLow-{{ task.id }}" class="form-check-label">Low</label>
+                        {% elif task.priority == 2 %}
+                            <input
+                                type="radio"
+                                class="form-check-input medium"
+                                id="priorityMedium-{{ task.id }}"
+                                name="priority-{{ task.id }}"
+                                value="2"
+                                checked
+                                disabled>
+                            <label for="priorityMedium-{{ task.id }}" class="form-check-label">Medium</label>
+                        {% elif task.priority == 3 %}
+                            <input
+                                type="radio"
+                                class="form-check-input high"
+                                id="priorityHigh-{{ task.id }}"
+                                name="priority-{{ task.id }}"
+                                value="3"
+                                checked
+                                disabled>
+                            <label for="priorityHigh-{{ task.id }}" class="form-check-label">High</label>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{{ task.status }}</td>
+                <td>{{ task.due_date.strftime('%d/%m/%Y') if task.due_date else 'N/A' }}</td>
+                <td>{{ task.group.name if task.group else 'No Group' }}</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#details-{{ task.id }}">Expand</button>
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ task.id }}">Edit</button>
+                    <a class="btn btn-danger btn-sm" href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a>
+                </td>
+            </tr>
+
+            <!-- Collapsible Row -->
+            <tr class="collapse" id="details-{{ task.id }}">
+                <td colspan="7">
+                    <div class="p-3">
+                        <p><strong>Description:</strong> {{ task.description or 'No description available' }}</p>
+                    </div>
+                </td>
+            </tr>
+
         {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
+
+<!-- Group View (Initially Hidden) -->
+<div id="groupView" style="display: none;">
+    {% for group in groups %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>{{ group.name }}</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Description:</strong> {{ group.description }}</p>
+                <h6>Tasks:</h6>
+                {% if group.tasks %}
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for task in group.tasks %}
+                            <tr>
+                                <td>{{ task.title }}</td>
+                                <td>
+                                    <div class="form-check">
+                                        {% if task.priority == 1 %}
+                                            <input
+                                                type="radio"
+                                                class="form-check-input low"
+                                                id="priorityLow-{{ task.id }}"
+                                                name="priority-{{ task.id }}"
+                                                value="1"
+                                                checked
+                                                disabled>
+                                            <label for="priorityLow-{{ task.id }}" class="form-check-label">Low</label>
+                                        {% elif task.priority == 2 %}
+                                            <input
+                                                type="radio"
+                                                class="form-check-input medium"
+                                                id="priorityMedium-{{ task.id }}"
+                                                name="priority-{{ task.id }}"
+                                                value="2"
+                                                checked
+                                                disabled>
+                                            <label for="priorityMedium-{{ task.id }}" class="form-check-label">Medium</label>
+                                        {% elif task.priority == 3 %}
+                                            <input
+                                                type="radio"
+                                                class="form-check-input high"
+                                                id="priorityHigh-{{ task.id }}"
+                                                name="priority-{{ task.id }}"
+                                                value="3"
+                                                checked
+                                                disabled>
+                                            <label for="priorityHigh-{{ task.id }}" class="form-check-label">High</label>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ task.status }}</td>
+                                <td>{{ task.due_date.strftime('%d/%m/%Y') if task.due_date else 'N/A' }}</td>
+                                <td>
+                                    <button class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#details-{{ task.id }}">Expand</button>
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ task.id }}">Edit</button>
+                                    <a class="btn btn-danger btn-sm" href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a>
+                                </td>
+                            </tr>
+
+                            <!-- Collapsible Row -->
+                            <tr class="collapse" id="details-{{ task.id }}">
+                                <td colspan="7">
+                                    <div class="p-3">
+                                        <p><strong>Description:</strong> {{ task.description or 'No description available' }}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No tasks in this group. Add a new task from the button above, or return to task view and edit an existing task.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Modals for Editing Tasks -->
+{% for task in tasks %}
+<div class="modal fade" id="editTaskModal-{{ task.id }}" tabindex="-1" aria-labelledby="editTaskLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('update_task', task_id=task.id) }}">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTaskLabel">Edit Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label for="title-{{ task.id }}" class="form-label">Title:</label>
+                        <input type="text" class="form-control" id="title-{{ task.id }}" name="title" value="{{ task.title }}">
+                    </div>
+
+                    <label for="priority-{{ task.id }}" class="form-label">Priority:</label>
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <div class="form-check">
+                            <input
+                                type="radio"
+                                name="priority"
+                                value="1"
+                                class="form-check-input low"
+                                id="priorityLow-{{ task.id }}"
+                                {% if task.priority == 1 %}checked{% endif %}>
+                            <label for="priorityLow-{{ task.id }}" class="form-check-label">Low</label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                type="radio"
+                                name="priority"
+                                value="2"
+                                class="form-check-input medium"
+                                id="priorityMedium-{{ task.id }}"
+                                {% if task.priority == 2 %}checked{% endif %}>
+                            <label for="priorityMedium-{{ task.id }}" class="form-check-label">Medium</label>
+                        </div>
+                        <div class="form-check">
+                            <input
+                                type="radio"
+                                name="priority"
+                                value="3"
+                                class="form-check-input high"
+                                id="priorityHigh-{{ task.id }}"
+                                {% if task.priority == 3 %}checked{% endif %}>
+                            <label for="priorityHigh-{{ task.id }}" class="form-check-label">High</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status-{{ task.id }}" class="form-label">Status:</label>
+                        <select class="form-select" id="status-{{ task.id }}" name="status">
+                            <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="due_date-{{ task.id }}" class="form-label">Due Date:</label>
+                        <input type="date" class="form-control" id="due_date-{{ task.id }}" name="due_date" value="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="group-{{ task.id }}" class="form-label">Group:</label>
+                        <select class="form-select" id="group-{{ task.id }}" name="group_id">
+                            <option value="">No Group</option>
+                            {% for group in groups %}
+                            <option value="{{ group.id }}" {% if task.group and task.group.id == group.id %}selected{% endif %}>{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock %}

@@ -1,3 +1,4 @@
+// JavaScript to toggle the ability to edit group details from the manage_groups page
 function toggleEdit(groupId) {
     var groupName = document.getElementById("group-name-" + groupId);
     var groupDescription = document.getElementById("group-description-" + groupId);
@@ -16,3 +17,18 @@ function toggleEdit(groupId) {
     editBtn.style.display = groupName.readOnly ? "inline-block" : "none";
     confirmBtn.style.display = groupName.readOnly ? "none" : "inline-block";
 }
+
+// JavaScript to toggle between Task View and Group View on index page
+const viewToggle = document.getElementById('viewToggle');
+const taskView = document.getElementById('taskView');
+const groupView = document.getElementById('groupView');
+
+viewToggle.addEventListener('change', function() {
+    if (viewToggle.checked) {
+        taskView.style.display = 'none';
+        groupView.style.display = 'block';
+    } else {
+        taskView.style.display = 'block';
+        groupView.style.display = 'none';
+    }
+});

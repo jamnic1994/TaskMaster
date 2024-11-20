@@ -59,9 +59,8 @@ class Task(db.Model):
     priority = db.Column(db.Integer, nullable=True)
     description = db.Column(db.Text)
     status = db.Column(db.String(50), default='Pending')
-    group_id = db.Column(db.Integer, db.ForeignKey('taskGroup.id'))  # Foreign key to group
+    group_id = db.Column(db.Integer, db.ForeignKey('taskGroup.id'), nullable=True)  # Foreign key to group
 
     # Define the foreign key linking to User
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-
 
