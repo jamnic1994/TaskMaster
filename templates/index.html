@@ -47,7 +47,6 @@
                                 value="1"
                                 checked
                                 disabled>
-                            <label for="priorityLow-{{ task.id }}" class="form-check-label">Low</label>
                         {% elif task.priority == 2 %}
                             <input
                                 type="radio"
@@ -57,7 +56,6 @@
                                 value="2"
                                 checked
                                 disabled>
-                            <label for="priorityMedium-{{ task.id }}" class="form-check-label">Medium</label>
                         {% elif task.priority == 3 %}
                             <input
                                 type="radio"
@@ -67,7 +65,6 @@
                                 value="3"
                                 checked
                                 disabled>
-                            <label for="priorityHigh-{{ task.id }}" class="form-check-label">High</label>
                         {% endif %}
                     </div>
                 </td>
@@ -106,6 +103,7 @@
                 <p><strong>Description:</strong> {{ group.description }}</p>
                 <h6>Tasks:</h6>
                 {% if group.tasks %}
+
                     <table class="table table-hover table-striped">
                         <thead>
                             <tr>
@@ -116,6 +114,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
+
                         <tbody>
                         {% for task in group.tasks %}
                             <tr>
@@ -131,7 +130,6 @@
                                                 value="1"
                                                 checked
                                                 disabled>
-                                            <label for="priorityLow-{{ task.id }}" class="form-check-label">Low</label>
                                         {% elif task.priority == 2 %}
                                             <input
                                                 type="radio"
@@ -141,7 +139,6 @@
                                                 value="2"
                                                 checked
                                                 disabled>
-                                            <label for="priorityMedium-{{ task.id }}" class="form-check-label">Medium</label>
                                         {% elif task.priority == 3 %}
                                             <input
                                                 type="radio"
@@ -151,12 +148,13 @@
                                                 value="3"
                                                 checked
                                                 disabled>
-                                            <label for="priorityHigh-{{ task.id }}" class="form-check-label">High</label>
                                         {% endif %}
                                     </div>
                                 </td>
+
                                 <td>{{ task.status }}</td>
                                 <td>{{ task.due_date.strftime('%d/%m/%Y') if task.due_date else 'N/A' }}</td>
+
                                 <td>
                                     <button class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#details-{{ task.id }}">Expand</button>
                                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ task.id }}">Edit</button>
@@ -172,6 +170,7 @@
                                     </div>
                                 </td>
                             </tr>
+
                         {% endfor %}
                         </tbody>
                     </table>
