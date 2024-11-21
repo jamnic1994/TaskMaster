@@ -1,10 +1,9 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import Flask, render_template, redirect, url_for, request, flash
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Task, TaskGroup
+from models import db, User, Task, TaskGroup, CompletedTask
 import config
 
 app = Flask(__name__)
@@ -100,7 +99,7 @@ def add_task():
         )
         db.session.add(new_task)
         db.session.commit()
-        flash('Task added successfully!')
+        flash('Task added successfully!', 'success')
         return redirect(url_for('index'))
 
     groups = TaskGroup.query.filter_by(user_id=current_user.id).all()  # Fetch user's groups
@@ -170,7 +169,7 @@ def edit_group(group_id):
     if request.method == 'POST':
         group.name = request.form['name']
         db.session.commit()
-        flash('Group updated successfully!')
+        flash('Group updated successfully!', 'success')
         return redirect(url_for('manage_groups'))
     return render_template('edit_group.html', group=group)
 
@@ -216,6 +215,98 @@ def tasks_by_group(group_id):
     # Fetch the group itself
     group = TaskGroup.query.get_or_404(group_id)
     return render_template('index.html', tasks=tasks, group=group)
+
+@app.route('/complete_task/<int:task_id>', methods=['POST'])
+@login_required
+def complete_task(task_id):
+    task = Task.query.get_or_404(task_id)
+
+    # Copy task details to CompletedTask
+    completed_task = CompletedTask(
+        user_id=task.user_id,
+        title=task.title,
+        group_id=task.group_id,
+        completed_date=date.today()
+    )
+
+    # Add to CompletedTask table and delete from Task table
+    db.session.add(completed_task)
+    db.session.delete(task)
+    db.session.commit()
+
+    flash('Task marked as completed!', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/completed-tasks')
+@login_required
+def completed_tasks():
+    completed_tasks = CompletedTask.query.filter_by(user_id=current_user.id).all()
+    return render_template('completed_tasks.html', completed_tasks=completed_tasks)
+
+@app.route('/account', methods=['GET'])
+@login_required
+def account():
+    # Get the user's tasks
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    completed_tasks = CompletedTask.query.filter_by(user_id=current_user.id).all()
+
+    # Count the tasks
+    total_tasks = len(tasks)
+    completed_task_count = len(completed_tasks)
+
+    return render_template('account.html', total_tasks=total_tasks, completed_task_count=completed_task_count)
+
+
+@app.route('/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    # Delete the current user from the database
+    db.session.delete(current_user)
+    db.session.commit()
+
+    # Log out the user after deletion
+    logout_user()
+
+    # Redirect to the login page or homepage
+    return redirect(url_for('login'))
+
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+
+    # Validate current password
+    if not check_password_hash(current_user.password_hash, current_password):
+        flash('Current password is incorrect.', 'danger')
+        return redirect(url_for('account'))
+
+    # Validate new password
+    if new_password != confirm_password:
+        flash('New password and confirmation do not match.', 'danger')
+        return redirect(url_for('account'))
+
+    # Update the password
+    current_user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+    flash('Your password has been updated.', 'success')
+    return redirect(url_for('account'))
+
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def update_account():
+    if request.method == 'POST':
+        # Update user details
+        current_user.first_name = request.form['first_name']
+        current_user.last_name = request.form['last_name']
+        current_user.email = request.form['email']
+        current_user.username = request.form['username']
+        db.session.commit()
+        flash('Your details have been updated!', 'success')
+        return redirect(url_for('account'))
+
+    return render_template('account.html')
 
 @app.route('/logout')
 def logout():

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-center mb-4">My Account</h2>
+
+<div class="form-container mt-4">
+    <h2>Account Details</h2>
+
+    <!-- Display the current user's details in a read-only format -->
+    <div class="mb-3">
+      <label class="form-label"><strong>First Name:</strong></label>
+        <p>{{ current_user.first_name }}</p>
+    </div>
+    <div class="mb-3">
+      <label class="form-label"><strong>Surname:</strong></label>
+        <p>{{ current_user.surname }}</p>
+    </div>
+    <div class="mb-3">
+      <label class="form-label"><strong>Email:</strong></label>
+        <p>{{ current_user.email }}</p>
+    </div>
+    <div class="mb-3">
+      <label class="form-label"><strong>Username:</strong></label>
+        <p>{{ current_user.username }}</p>
+    </div>
+
+    <!-- Buttons to open the modal for editing details or changing the password -->
+    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit Details</button>
+    <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
+
+
+    <form action="{{ url_for('delete_account') }}" method="POST" style="display:inline;">
+        <button type="submit" class="btn btn-danger ms-2" onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.')">Delete Account</button>
+    </form>
+
+    <!-- Task Summary -->
+    <hr>
+    <h4>Task Summary</h4>
+    <p><strong>Total Outstanding Tasks:</strong> {{ total_tasks }}</p>
+    <p><strong>Completed Tasks:</strong> {{ completed_task_count }}</p>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('change_password') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for editing user details -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit Account Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('account') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name:</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ current_user.first_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="surname" class="form-label">Last Name:</label>
+                        <input type="text" class="form-control" id="surname" name="last_name" value="{{ current_user.surname }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username:</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ current_user.username }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

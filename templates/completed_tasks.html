@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Completed Tasks</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Completed Date</th>
+            <th>Group</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in completed_tasks %}
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>{{ task.completed_date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ task.group.name if task.group else 'No Group' }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

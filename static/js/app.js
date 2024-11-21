@@ -32,3 +32,19 @@ viewToggle.addEventListener('change', function() {
         groupView.style.display = 'none';
     }
 });
+
+function confirmCompletion(taskId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This task will be marked as completed!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, mark it complete!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById(`completeTaskForm-${taskId}`).submit();
+        }
+    });
+}
