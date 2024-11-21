@@ -73,6 +73,9 @@
                 <td>{{ task.group.name if task.group else 'No Group' }}</td>
                 <td>
                     <button class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#details-{{ task.id }}">Expand</button>
+                    <form id="completeTaskForm-{{ task.id }}" action="{{ url_for('complete_task', task_id=task.id) }}" method="POST" style="display:inline;">
+                        <button type="button" class="btn btn-success btn-sm" onclick="confirmCompletion('{{ task.id }}')">Complete</button>
+                    </form>
                     <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal-{{ task.id }}">Edit</button>
                     <a class="btn btn-danger btn-sm" href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a>
                 </td>
