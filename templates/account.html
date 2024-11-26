@@ -3,41 +3,44 @@
 {% block content %}
 <h2 class="text-center mb-4">My Account</h2>
 
-<div class="form-container mt-4">
-    <h2>Account Details</h2>
+<div class="d-flex align-items-center justify-content-center">
+    <div class="col-md-5">
+        <div class="form-container mt-4">
+            <h2>Account Details</h2>
+            <hr>
+            <!-- Display the current user's details in a read-only format -->
+            <div class="mb-3">
+                <label class="form-label"><strong>First Name:</strong></label>
+                <p>{{ current_user.first_name }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><strong>Surname:</strong></label>
+                <p>{{ current_user.surname }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><strong>Email:</strong></label>
+                <p>{{ current_user.email }}</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label"><strong>Username:</strong></label>
+                <p>{{ current_user.username }}</p>
+            </div>
 
-    <!-- Display the current user's details in a read-only format -->
-    <div class="mb-3">
-      <label class="form-label"><strong>First Name:</strong></label>
-        <p>{{ current_user.first_name }}</p>
+            <!-- Buttons to open the modal for editing details or changing the password -->
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit Details</button>
+            <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
+
+            <form action="{{ url_for('delete_account') }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger ms-2" onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.')">Delete Account</button>
+            </form>
+
+            <!-- Task Summary -->
+            <hr>
+            <h4>Task Summary</h4>
+            <p><strong>Total Outstanding Tasks:</strong> {{ total_tasks }}</p>
+            <p><strong>Completed Tasks:</strong> {{ completed_task_count }}</p>
+        </div>
     </div>
-    <div class="mb-3">
-      <label class="form-label"><strong>Surname:</strong></label>
-        <p>{{ current_user.surname }}</p>
-    </div>
-    <div class="mb-3">
-      <label class="form-label"><strong>Email:</strong></label>
-        <p>{{ current_user.email }}</p>
-    </div>
-    <div class="mb-3">
-      <label class="form-label"><strong>Username:</strong></label>
-        <p>{{ current_user.username }}</p>
-    </div>
-
-    <!-- Buttons to open the modal for editing details or changing the password -->
-    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit Details</button>
-    <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
-
-
-    <form action="{{ url_for('delete_account') }}" method="POST" style="display:inline;">
-        <button type="submit" class="btn btn-danger ms-2" onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.')">Delete Account</button>
-    </form>
-
-    <!-- Task Summary -->
-    <hr>
-    <h4>Task Summary</h4>
-    <p><strong>Total Outstanding Tasks:</strong> {{ total_tasks }}</p>
-    <p><strong>Completed Tasks:</strong> {{ completed_task_count }}</p>
 </div>
 
 <!-- Change Password Modal -->

@@ -1,37 +1,76 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="text-center">Register</h2>
-
-        <form method="POST">
-        <div class="form-container">
-            <div class="mb-3">
-                <label for="first_name" class="form-label">First Name</label>
-                <input type="text" name="first_name" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="surname" class="form-label">Surname</label>
-                <input type="text" name="surname" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Register</button>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <!-- Main form container -->
+        <div class="col-md-6">
+            <h2 class="text-center">Register</h2>
+            <form method="POST">
+                <div class="form-container">
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" name="first_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="surname" class="form-label">Surname</label>
+                        <input type="text" name="surname" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                </div>
         </div>
-        </form>
+
+        <!-- Security Questions container -->
+        <div class="col-md-6">
+            <h4 class="text-center">Security Questions</h4>
+            <div class="form-container">
+                <div class="mb-3">
+                    <label for="mem_ques1" class="form-label">Memorable Question 1</label>
+                    <select name="mem_ques1" id="mem_ques1" class="form-control" required>
+                        <option value="" disabled selected>-- Select a question --</option>
+                        <option value="What is your favorite color?">What is your favorite color?</option>
+                        <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                        <option value="What is the name of your hometown?">What is the name of the city you were born in?</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="mem_ans1" class="form-label">Answer:</label>
+                    <input type="text" name="mem_ans1" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="mem_ques2" class="form-label">Memorable Question 2</label>
+                    <select name="mem_ques2" id="mem_ques2" class="form-control" required>
+                        <option value="" disabled selected>-- Select a question --</option>
+                        <option value="What is your favorite book?">What is your favorite book?</option>
+                        <option value="What was the make and model of your first car?">What was the make and model of your first car?</option>
+                        <option value="What is the name of your elementary school?">What is the name of your primary school?</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="mem_ans2" class="form-label">Answer:</label>
+                    <input type="text" name="mem_ans2" class="form-control" required>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Submit button -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary w-50">Register</button>
+        </div>
+    </div>
+    </form>
 </div>
 {% endblock %}

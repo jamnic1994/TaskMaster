@@ -22,6 +22,10 @@ class User(db.Model):
     first_name = db.Column(db.String(150), nullable=False)
     surname = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
+    mem_ques1 = db.Column(db.String(200), nullable=False)
+    mem_ques2 = db.Column(db.String(200), nullable=False)
+    mem_ans1 = db.Column(db.String, nullable=False)
+    mem_ans2 = db.Column(db.String, nullable=False)
 
     def __repr__(self):
         return f'<User {self.username}>'

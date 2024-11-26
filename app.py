@@ -45,31 +45,59 @@ def login():
     return render_template('login.html')
 
 
+from werkzeug.security import generate_password_hash
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        password = request.form['password']
-        hashed_password = generate_password_hash(password)
+        # Retrieve form data
+        first_name = request.form.get('first_name')
+        surname = request.form.get('surname')
+        email = request.form.get('email')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        mem_ques1 = request.form.get('mem_ques1')
+        mem_ques2 = request.form.get('mem_ques2')
+        mem_ans1 = request.form.get('mem_ans1')
+        mem_ans2 = request.form.get('mem_ans2')
 
-        user_data = {
-            "username": request.form['username'],
-            "password_hash": hashed_password,  # Make sure you're using password_hash
-            "first_name": request.form['first_name'],
-            "surname": request.form['surname'],
-            "email": request.form['email']
-        }
+        # Hash the password and security answers
+        password_hash = generate_password_hash(password)
+        mem_ans1_hash = generate_password_hash(mem_ans1)
+        mem_ans2_hash = generate_password_hash(mem_ans2)
 
-        if User.query.filter((User.username == user_data['username']) | (User.email == user_data['email'])).first():
-            flash('Username or email already taken.', 'error')
+        # Check if username or email already exists
+        existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
+        if existing_user:
+            flash('Username or Email already exists. Please choose another.', 'danger')
             return redirect(url_for('register'))
 
-        new_user = User(**user_data)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Registration successful. Please log in.', 'success')
-        return redirect(url_for('login'))
+        # Create a new user object
+        new_user = User(
+            first_name=first_name,
+            surname=surname,
+            email=email,
+            username=username,
+            password_hash=password_hash,
+            mem_ques1=mem_ques1,
+            mem_ques2=mem_ques2,
+            mem_ans1=mem_ans1_hash,
+            mem_ans2=mem_ans2_hash
+        )
+
+        # Add the user to the database
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registration successful! You can now log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred: {e}', 'danger')
+            return redirect(url_for('register'))
 
     return render_template('register.html')
+
 
 @app.route('/index')
 @login_required
@@ -307,6 +335,51 @@ def update_account():
         return redirect(url_for('account'))
 
     return render_template('account.html')
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'verify':  # Handle verification of memorable questions
+            email = request.form.get('email')
+            mem_ques1 = request.form.get('mem_ques1')
+            mem_ans1 = request.form.get('mem_ans1')
+            mem_ques2 = request.form.get('mem_ques2')
+            mem_ans2 = request.form.get('mem_ans2')
+
+            user = User.query.filter_by(email=email).first()
+
+            if user:
+                from werkzeug.security import check_password_hash
+                if (
+                    user.mem_ques1 == mem_ques1 and
+                    check_password_hash(user.mem_ans1, mem_ans1) and
+                    user.mem_ques2 == mem_ques2 and
+                    check_password_hash(user.mem_ans2, mem_ans2)
+                ):
+                    return render_template('forgot_password.html', verified=True, user_id=user.id)
+                else:
+                    flash('Incorrect answers to the memorable questions.', 'danger')
+            else:
+                flash('No account found with that email.', 'danger')
+
+        elif action == 'reset':  # Handle password reset
+            user_id = request.form.get('user_id')
+            new_password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+
+            if new_password == confirm_password:
+                user = User.query.get(user_id)
+                user.password_hash = generate_password_hash(new_password)
+                db.session.commit()
+                flash('Password reset successful! You can now log in.', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash('Passwords do not match.', 'danger')
+
+    return render_template('forgot_password.html', verified=False)
+
 
 @app.route('/logout')
 def logout():
