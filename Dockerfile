@@ -18,4 +18,4 @@ EXPOSE 5000
 ENV FLASK_APP=app.py
 
 # Command to run the application
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["bash", "-c", "python init_db.py && flask run --host=0.0.0.0"]
