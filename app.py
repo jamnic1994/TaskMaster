@@ -138,6 +138,10 @@ def add_task():
 def update_task(task_id):
     task = Task.query.get_or_404(task_id)
 
+    # Debug: Print incoming data
+    print("Form data:", request.form)
+    print("Task before update:", task)
+
     # Update task fields from form data
     task.title = request.form['title']
     task.priority = request.form['priority']
@@ -156,13 +160,23 @@ def update_task(task_id):
 
     # Handle group_id
     group_id = request.form.get('group_id')
-    task.group_id = int(group_id) if group_id else None
+    print("Group ID from form:", group_id)  # Debug
+
+    if group_id:  # If group_id is provided
+        group = TaskGroup.query.get(int(group_id))  # Validate the group exists
+        if group:
+            task.group_id = group.id
+        else:
+            flash('Invalid group ID.', 'danger')
+            return redirect(url_for('index'))
+    else:
+        task.group_id = None  # Clear group association if not provided
 
     # Commit changes to the database
     db.session.commit()
+    print("Task after update:", task)  # Debug
     flash('Task updated successfully', 'success')
     return redirect(url_for('index'))
-
 
 @app.route('/delete/<int:task_id>')
 @login_required

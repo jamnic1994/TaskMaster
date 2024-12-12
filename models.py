@@ -64,6 +64,9 @@ class Task(db.Model):
     # Relationship to User (Cascade delete tasks when user is deleted)
     user = db.relationship('User', backref=db.backref('tasks', cascade='all, delete'), lazy=True)
 
+    # Relationship to TaskGroup (Link task to a task group)
+    group = db.relationship('TaskGroup', backref=db.backref('tasks', lazy=True), lazy=True)
+
 class CompletedTask(db.Model):
     __tablename__ = 'completedTasks'
 
